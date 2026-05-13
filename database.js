@@ -37,11 +37,11 @@ async function getAllMessagesAsc() {
 
 async function countMessages() {
   const res = await pool.query('SELECT COUNT(*) as total FROM messages');
-
-  async function clearAllMessages() {
-  await pool.query('DELETE FROM messages');
-}
   return { total: parseInt(res.rows[0].total, 10) };
 }
 
-module.exports = { initDatabase, insertMessage, getAllMessages, getAllMessagesAsc, countMessag, clearAllMessages es };
+async function clearAllMessages() {
+  await pool.query('DELETE FROM messages');
+}
+
+module.exports = { initDatabase, insertMessage, getAllMessages, getAllMessagesAsc, countMessages, clearAllMessages };
