@@ -106,7 +106,7 @@
       messages.unshift(m);
       const list = document.getElementById('msg-list');
       // Rimuove il placeholder se presente
-      const ph = list.querySelector('p');
+            const ph = list.querySelector(':scope > p');
       if (ph) ph.remove();
       // Inserisce in cima alla lista con animazione
       list.insertBefore(msgEl(m), list.firstChild);
