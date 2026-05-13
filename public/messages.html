@@ -26,6 +26,11 @@
            style="width:auto;padding:10px 20px;font-size:.9rem">
           &#128196; Scarica PDF
         </a>
+                <button onclick="clearMessages()"
+          class="btn"
+          style="width:auto;padding:10px 20px;font-size:.9rem;background:var(--danger);color:#fff;border:none;border-radius:8px;cursor:pointer;">
+          🗑️ Svuota messaggi
+        </button>
         <a href="/"
            class="btn btn-secondary"
            style="width:auto;padding:10px 20px;font-size:.9rem">
@@ -116,7 +121,27 @@
     socket.on('connect',    () => console.log('WebSocket connesso'));
     socket.on('disconnect', () => console.log('WebSocket disconnesso'));
 
+        // Svuota lista in tempo reale quando il server cancella tutti i messaggi
+    socket.on('messages_cleared', () => {
+      messages = [];
+      document.getElementById('msg-list').innerHTML =
+        '<p style="color:var(--muted);text-align:center;padding:60px 20px">' +
+        'Nessun messaggio ancora. Condividi il QR code!</p>';
+      updateCount();
+    });
+
     loadMessages();
+
+    // Funzione svuota messaggi
+    async function clearMessages() {
+      if (!confirm('Sei sicuro di voler eliminare TUTTI i messaggi? Questa azione è irreversibile.')) return;
+      try {
+        const res = await fetch('/api/messages', { method: 'DELETE' });
+        if (!res.ok) throw new Error();
+      } catch {
+        alert('Errore durante l\'eliminazione dei messaggi.');
+      }
+    }
   </script>
 
 </body>
