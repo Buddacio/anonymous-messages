@@ -137,10 +137,12 @@
       if (!confirm('Sei sicuro di voler eliminare TUTTI i messaggi? Questa azione è irreversibile.')) return;
       try {
         const res = await fetch('/api/messages', { method: 'DELETE' });
-        if (!res.ok) throw new Error();
-      } catch {
-        alert('Errore durante l\'eliminazione dei messaggi.');
-      }
+        if (!res.ok) {
+            const data = await res.json().catch(() => ({}));
+            throw new Error(data.error || 'Risposta server non valida');
+          }
+        } catch (err) {
+          alert('Errore durante l\'eliminazione dei messaggi: ' + err.message);
     }
   </script>
 
