@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1.0">
+  <title>Messaggi Anonimi - Home</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <!-- HOMEPAGE: mostra il QR code e link alla pagina messaggi -->
+
+  <header>
+    <h1>&#128229; Messaggi Anonimi</h1>
+    <p>Scansiona il QR code con il tuo smartphone per inviare un messaggio anonimo</p>
+  </header>
+
+  <div class="container">
+
+    <!-- Card QR code -->
+    <div class="card">
+      <div class="qr-box" id="qr-box">
+        <p style="color:var(--muted)">Caricamento QR code...</p>
+      </div>
+    </div>
+
+    <!-- Card link messaggi -->
+    <div class="card" style="text-align:center">
+      <h2 style="color:var(--primary);margin-bottom:10px">&#128172; Messaggi ricevuti</h2>
+      <p style="color:var(--muted);margin-bottom:20px">
+        Visualizza in tempo reale tutti i messaggi anonimi inviati.
+      </p>
+      <a href="/messages" class="btn" style="display:inline-block;width:auto;padding:12px 32px">
+        Apri bacheca messaggi &rarr;
+      </a>
+    </div>
+
+  </div>
+
+  <script>
+    // Carica il QR code dall'API all'avvio della pagina
+    async function loadQR() {
+      try {
+        const res  = await fetch('/api/qrcode');
+        const data = await res.json();
+        if (data.success) {
+          document.getElementById('qr-box').innerHTML =
+            '<img src="' + data.qrCode + '" alt="QR Code" width="260">' +
+            '<p class="qr-url">' + data.sendUrl + '</p>' +
+            '<span class="badge">&#128247; Scansiona per inviare</span>';
+        } else {
+          document.getElementById('qr-box').innerHTML =
+            '<p style="color:var(--danger)">Errore caricamento QR.</p>';
+        }
+      } catch(e) {
+        document.getElementById('qr-box').innerHTML =
+          '<p style="color:var(--danger)">Impossibile connettersi al server.</p>';
+      }
+    }
+    loadQR();
+  </script>
+
+</body>
+</html>

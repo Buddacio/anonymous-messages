@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1.0">
+  <title>Messaggi Ricevuti - Live</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <!-- PAGINA MESSAGGI: lista in real-time via Socket.io + download PDF -->
+
+  <header>
+    <h1>&#128172; Messaggi Ricevuti</h1>
+    <p><span id="live-dot"></span>Aggiornamento in tempo reale</p>
+  </header>
+
+  <div class="container">
+
+    <!-- Barra azioni -->
+    <div class="top-bar">
+      <span class="badge" id="msg-count">0 messaggi</span>
+      <div class="actions">
+        <a href="/api/messages/pdf"
+           class="btn btn-secondary"
+           style="width:auto;padding:10px 20px;font-size:.9rem">
+          &#128196; Scarica PDF
+        </a>
+        <a href="/"
+           class="btn btn-secondary"
+           style="width:auto;padding:10px 20px;font-size:.9rem">
+          &#8592; QR Home
+        </a>
+      </div>
+    </div>
+
+    <!-- Lista messaggi -->
+    <div id="msg-list">
+      <p style="color:var(--muted);text-align:center;padding:60px 20px">
+        Caricamento messaggi...
+      </p>
+    </div>
+
+  </div>
+
+  <!-- Socket.io: fornito automaticamente dal server Express -->
+  <script src="/socket.io/socket.io.js"></script>
+  <script>
+    const socket = io();   // connessione WebSocket al server
+    let messages = [];
+
+    // Formatta data/ora in italiano
+    function fmt(ts) {
+      return new Date(ts).toLocaleString('it-IT', {
+        dateStyle: 'medium', timeStyle: 'short'
+      });
+    }
+
+    // Sanifica il testo per prevenire XSS
+    function esc(s) {
+      return s
+        .replace(/&/g,'&amp;').replace(/</g,'&lt;')
+        .replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+    }
+
+    // Costruisce il DOM di un messaggio
+    function msgEl(m) {
+      const d = document.createElement('div');
+      d.className  = 'msg-item';
+      d.dataset.id = m.id;
+      d.innerHTML  = '<p>' + esc(m.content) + '</p><time>' + fmt(m.timestamp) + '</time>';
+      return d;
+    }
+
+    // Aggiorna il contatore
+    function updateCount() {
+      const n = messages.length;
+      document.getElementById('msg-count').textContent =
+        n + (n === 1 ? ' messaggio' : ' messaggi');
+    }
+
+    // Carica i messaggi esistenti all'apertura della pagina
+    async function loadMessages() {
+      try {
+        const res  = await fetch('/api/messages');
+        const data = await res.json();
+        messages = data.messages;
+        const list = document.getElementById('msg-list');
+        list.innerHTML = '';
+        if (messages.length === 0) {
+          list.innerHTML =
+            '<p style="color:var(--muted);text-align:center;padding:60px 20px">' +
+            'Nessun messaggio ancora. Condividi il QR code!</p>';
+        } else {
+          messages.forEach(m => list.appendChild(msgEl(m)));
+        }
+        updateCount();
+      } catch(e) {
+        document.getElementById('msg-list').innerHTML =
+          '<p style="color:var(--danger);text-align:center;padding:40px">Impossibile caricare i messaggi.</p>';
+      }
+    }
+
+    // Nuovo messaggio in tempo reale via WebSocket
+    socket.on('new_message', (m) => {
+      messages.unshift(m);
+      const list = document.getElementById('msg-list');
+      // Rimuove il placeholder se presente
+      const ph = list.querySelector('p');
+      if (ph) ph.remove();
+      // Inserisce in cima alla lista con animazione
+      list.insertBefore(msgEl(m), list.firstChild);
+      updateCount();
+    });
+
+    socket.on('connect',    () => console.log('WebSocket connesso'));
+    socket.on('disconnect', () => console.log('WebSocket disconnesso'));
+
+    loadMessages();
+  </script>
+
+</body>
+</html>

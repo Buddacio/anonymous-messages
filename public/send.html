@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1.0">
+  <title>Invia Messaggio Anonimo</title>
+  <link rel="stylesheet" href="style.css">
+  <style>
+    body {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      padding: 20px;
+    }
+    .send-card { width: 100%; max-width: 560px; }
+    .send-card h1 { color: var(--primary); margin-bottom: 8px; font-size: 1.7rem; }
+    .send-card .sub { color: var(--muted); margin-bottom: 20px; }
+  </style>
+</head>
+<body>
+
+  <!-- PAGINA INVIO: accessibile via QR code, NESSUN dato personale richiesto -->
+
+  <div class="card send-card">
+    <h1>&#9993;&#65039; Scrivi un messaggio</h1>
+    <p class="sub">Nessun nome. Nessun account. Totale anonimato.</p>
+
+    <div class="anon-badge">
+      &#128274; Anonimato garantito &mdash; non raccogliamo alcun dato personale.
+    </div>
+
+    <form id="msgForm" onsubmit="sendMessage(event)">
+      <textarea
+        id="msgText"
+        placeholder="Scrivi qui il tuo messaggio..."
+        oninput="updateCount()"
+        maxlength="1000"
+      ></textarea>
+      <div class="char-count" id="charCount">0 / 1000</div>
+
+      <div style="margin-top:16px">
+        <button type="submit" class="btn" id="sendBtn">
+          &#128228; Invia messaggio
+        </button>
+      </div>
+      <div id="feedback"></div>
+    </form>
+  </div>
+
+  <script>
+    // Aggiorna il contatore caratteri
+    function updateCount() {
+      const txt = document.getElementById('msgText');
+      const cc  = document.getElementById('charCount');
+      cc.textContent = txt.value.length + ' / 1000';
+      cc.className = 'char-count' + (txt.value.length > 900 ? ' warn' : '');
+    }
+
+    // Invia il messaggio al server via fetch
+    async function sendMessage(e) {
+      e.preventDefault();
+      const content = document.getElementById('msgText').value.trim();
+      const btn     = document.getElementById('sendBtn');
+      const fb      = document.getElementById('feedback');
+
+      if (!content) {
+        fb.innerHTML = '<div class="alert alert-error">Scrivi un messaggio prima di inviare.</div>';
+        return;
+      }
+
+      btn.disabled    = true;
+      btn.textContent = 'Invio in corso...';
+      fb.innerHTML    = '';
+
+      try {
+        const res  = await fetch('/api/messages', {
+          method:  'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body:    JSON.stringify({ content })
+        });
+        const data = await res.json();
+
+        if (data.success) {
+          fb.innerHTML = '<div class="alert alert-success">&#10003; Messaggio inviato! Grazie.</div>';
+          document.getElementById('msgText').value = '';
+          updateCount();
+          btn.textContent = '&#10003; Inviato!';
+          setTimeout(() => {
+            btn.disabled    = false;
+            btn.textContent = 'Invia messaggio';
+            fb.innerHTML    = '';
+          }, 3000);
+        } else {
+          fb.innerHTML = '<div class="alert alert-error">' + data.error + '</div>';
+          btn.disabled    = false;
+          btn.textContent = 'Invia messaggio';
+        }
+      } catch(err) {
+        fb.innerHTML = '<div class="alert alert-error">Errore di rete. Controlla la connessione.</div>';
+        btn.disabled    = false;
+        btn.textContent = 'Invia messaggio';
+      }
+    }
+  </script>
+
+</body>
+</html>
