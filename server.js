@@ -16,6 +16,7 @@ const {
   getAllMessages,
   getAllMessagesAsc,
   countMessages
+    clearAllMessages,
 } = require('./database');
 
 // --- Configurazione server ---
@@ -120,7 +121,7 @@ app.get('/api/messages/pdf', async (req, res) => {
 // ========================================================
 app.delete('/api/messages', async (req, res) => {
   try {
-    await pool.query('DELETE FROM messages');
+        await clearAllMessages();
     io.emit('messages_cleared');
     res.json({ success: true });
   } catch (err) {
