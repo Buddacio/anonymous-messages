@@ -41,7 +41,7 @@
     // Carica il QR code dall'API all'avvio della pagina
     async function loadQR() {
       try {
-        const res  = await fetch('/api/qrcode');
+        const res  = await fetch('/api/qr');
         const data = await res.json();
         if (data.success) {
           document.getElementById('qr-box').innerHTML =
