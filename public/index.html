@@ -43,11 +43,10 @@
       try {
         const res  = await fetch('/api/qr');
         const data = await res.json();
-        if (data.success) {
+                  if (data.qr) {
           document.getElementById('qr-box').innerHTML =
-            '<img src="' + data.qrCode + '" alt="QR Code" width="260">' +
-            '<p class="qr-url">' + data.sendUrl + '</p>' +
-            '<span class="badge">&#128247; Scansiona per inviare</span>';
+                          '<img src="' + data.qr + '" alt="QR Code" width="260">' +
+                        '<span class="badge">&#128247; Scansiona per inviare</span>';
         } else {
           document.getElementById('qr-box').innerHTML =
             '<p style="color:var(--danger)">Errore caricamento QR.</p>';
