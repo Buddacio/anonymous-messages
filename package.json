@@ -1,0 +1,21 @@
+{
+  "name": "anonymous-messages",
+  "version": "1.0.0",
+  "description": "App messaggi anonimi con QR code, real-time e export PDF",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "nodemon server.js"
+  },
+  "dependencies": {
+    "express": "^4.18.2",
+    "better-sqlite3": "^9.4.3",
+    "socket.io": "^4.7.4",
+    "qrcode": "^1.5.3",
+    "pdfkit": "^0.14.0",
+    "cors": "^2.8.5"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.0"
+  }
+}
