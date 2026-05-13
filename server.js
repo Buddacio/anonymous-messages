@@ -115,6 +115,20 @@ app.get('/api/messages/pdf', async (req, res) => {
   }
 });
 
+// ========================================================
+// DELETE /api/messages — Svuota tutti i messaggi
+// ========================================================
+app.delete('/api/messages', async (req, res) => {
+  try {
+    await pool.query('DELETE FROM messages');
+    io.emit('messages_cleared');
+    res.json({ success: true });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Errore eliminazione messaggi' });
+  }
+});
+
 // ============================================================
 // WebSocket: gestione connessioni client
 // ============================================================
