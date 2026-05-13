@@ -30,7 +30,7 @@ app.use(express.json());          // parsing body JSON
 app.use(express.static(path.join(__dirname, 'public')));  // file statici
 
 // Inizializza il database SQLite all'avvio
-initDatabase();
+initDatabase().catch(console.error);
 
 // ====================================================
 // ROUTE: Pagine HTML
