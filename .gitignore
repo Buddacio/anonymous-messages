@@ -1,0 +1,23 @@
+# Dipendenze
+node_modules/
+
+# Database locale (Render usa il filesystem effimero)
+messages.db
+
+# File di ambiente
+.env
+.env.local
+
+# Log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Editor
+.vscode/
+*.swp
+*.swo

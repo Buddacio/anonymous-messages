@@ -1,12 +1,12 @@
 // database.js - Gestione database con sql.js (SQLite puro JavaScript)
-// Compatibile con tutti gli ambienti incluso StackBlitz.
-// I dati sono mantenuti in memoria; per persistenza su disco usare fs.
+// Compatibile con tutti gli ambienti incluso Render, StackBlitz.
+// I dati sono mantenuti in memoria; per persistenza su disco usa fs.
 const initSqlJs = require('sql.js');
-const fs = require('fs');
-const path = require('path');
+const fs         = require('fs');
+const path       = require('path');
 
 const DB_PATH = path.join(__dirname, 'messages.db');
-let db;  // istanza database (inizializzata in modo asincrono)
+let db; // istanza database (inizializzata in modo asincrono)
 
 // Serializza il DB su file (chiamata dopo ogni scrittura)
 function saveToDisk() {
@@ -18,7 +18,9 @@ function saveToDisk() {
 
 // Inizializza il database e crea la tabella se non esiste
 async function initDatabase() {
-  const SQL = await initSqlJs();
+  const SQL = await initSqlJs({
+    locateFile: file => path.join(path.dirname(require.resolve('sql.js')), file)
+  });
   if (fs.existsSync(DB_PATH)) {
     // Carica il DB esistente dal file
     const fileBuffer = fs.readFileSync(DB_PATH);
@@ -27,33 +29,34 @@ async function initDatabase() {
     // Crea un nuovo DB vuoto
     db = new SQL.Database();
   }
+  // Crea tabella se non esiste
   db.run(`
     CREATE TABLE IF NOT EXISTS messages (
       id        INTEGER PRIMARY KEY AUTOINCREMENT,
-      content   TEXT    NOT NULL,
-      timestamp TEXT    DEFAULT (datetime('now','localtime'))
+      content   TEXT NOT NULL,
+      timestamp DATETIME DEFAULT CURRENT_TIMESTAMP
     )
   `);
   saveToDisk();
-  console.log('Database inizializzato.');
+  console.log('Database SQLite inizializzato con sql.js');
 }
 
-// Inserisce un messaggio e restituisce il record completo
+// Converte il risultato di db.exec() in array di oggetti
+function rowsToObjects(result) {
+  if (!result || result.length === 0) return [];
+  const { columns, values } = result[0];
+  return values.map(row =>
+    Object.fromEntries(columns.map((c, i) => [c, row[i]]))
+  );
+}
+
+// Inserisce un messaggio e restituisce l'oggetto inserito
 function insertMessage(content) {
   db.run('INSERT INTO messages (content) VALUES (?)', [content]);
-  const rows = db.exec('SELECT * FROM messages ORDER BY id DESC LIMIT 1');
+  const res = db.exec('SELECT * FROM messages ORDER BY id DESC LIMIT 1');
+  const msg = rowsToObjects(res)[0];
   saveToDisk();
-  const r = rows[0].values[0];
-  return { id: r[0], content: r[1], timestamp: r[2] };
-}
-
-// Helper: converte risultati sql.js in array di oggetti
-function rowsToObjects(res) {
-  if (!res || res.length === 0) return [];
-  const cols = res[0].columns;
-  return res[0].values.map(row =>
-    Object.fromEntries(cols.map((c, i) => [c, row[i]]))
-  );
+  return msg;
 }
 
 // Tutti i messaggi (piu recente prima)
