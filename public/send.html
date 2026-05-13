@@ -82,7 +82,7 @@
         });
         const data = await res.json();
 
-        if (data.success) {
+                if (res.ok) {
           fb.innerHTML = '<div class="alert alert-success">&#10003; Messaggio inviato! Grazie.</div>';
           document.getElementById('msgText').value = '';
           updateCount();
