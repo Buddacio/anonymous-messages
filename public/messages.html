@@ -84,7 +84,7 @@
       try {
         const res  = await fetch('/api/messages');
         const data = await res.json();
-        messages = data.messages;
+                messages = data;
         const list = document.getElementById('msg-list');
         list.innerHTML = '';
         if (messages.length === 0) {
