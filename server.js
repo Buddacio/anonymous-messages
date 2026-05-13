@@ -15,7 +15,7 @@ const {
   insertMessage,
   getAllMessages,
   getAllMessagesAsc,
-  countMessages
+  countMessages,
     clearAllMessages,
 } = require('./database');
 
