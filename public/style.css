@@ -361,3 +361,58 @@ footer {
     transition-duration: .01ms !important;
   }
 }
+
+
+/* === SWITCHER BOTTOM NAV === */
+.sw {
+  position: fixed;
+  bottom: 1.5rem;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 200;
+  display: flex;
+  gap: .5rem;
+  background: var(--surf);
+  border: 1px solid var(--brd);
+  border-radius: 9999px;
+  padding: .5rem;
+  box-shadow: var(--sh3);
+}
+
+.sw a,
+.sw button {
+  padding: .5rem 1.25rem;
+  border-radius: 9999px;
+  font-size: .875rem;
+  font-weight: 600;
+  color: var(--txm);
+  transition: background .18s, color .18s;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: .5rem;
+  cursor: pointer;
+  background: none;
+  border: none;
+  font: inherit;
+}
+
+.sw a.active,
+.sw button.active {
+  background: var(--pr);
+  color: #fff;
+}
+
+.sw a:hover:not(.active),
+.sw button:hover:not(.active) {
+  background: var(--off);
+  color: var(--tx);
+}
+
+@media (max-width: 600px) {
+  .sw a,
+  .sw button {
+    padding: .5rem .75rem;
+    font-size: .75rem;
+  }
+}
