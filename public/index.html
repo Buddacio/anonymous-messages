@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="it">
+<html lang="it" data-theme="light">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width,initial-scale=1.0">
@@ -10,51 +10,105 @@
 
   <!-- HOMEPAGE: mostra il QR code e link alla pagina messaggi -->
 
-  <header>
-    <h1>&#128229; Messaggi Anonimi</h1>
-    <p>Scansiona il QR code con il tuo smartphone per inviare un messaggio anonimo</p>
+  <header class="hdr">
+    <div class="hi">
+      <div class="logo">
+        <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
+          <rect width="32" height="32" rx="8" fill="var(--pr)"/>
+          <path d="M7 10h18M7 16h12M7 22h8" stroke="white" stroke-width="2.2" stroke-linecap="round"/>
+          <circle cx="26" cy="22" r="4" fill="white" opacity=".9"/>
+          <path d="M24.5 22h3M26 20.5v3" stroke="var(--pr)" stroke-width="1.5" stroke-linecap="round"/>
+        </svg>
+        <span>Messaggi Anonimi</span>
+      </div>
+      <div>
+        <nav class="hnav">
+          <a href="/messages">Bacheca messaggi</a>
+        </nav>
+        <button class="tgl" onclick="tt()" aria-label="Cambia tema">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+          </svg>
+        </button>
+      </div>
+    </div>
   </header>
 
-  <div class="container">
+  <main class="mc">
+    <section class="hero">
+      <p class="hl">Scansiona con il tuo telefono</p>
+      <h1 class="ht">Invia un messaggio<br><em>in totale anonimato</em></h1>
+      <p class="hd">Nessun nome, nessun account. Scansiona il QR code con la fotocamera del tuo telefono e scrivi liberamente.</p>
+    </section>
 
-    <!-- Card QR code -->
-    <div class="card">
-      <div class="qr-box" id="qr-box">
-        <p style="color:var(--muted)">Caricamento QR code...</p>
+    <div class="qrc">
+      <div class="qrph" id="qr-box">
+        <svg width="80" height="80" viewBox="0 0 80 80" fill="none">
+          <rect x="8" y="8" width="26" height="26" rx="3" stroke="var(--pr)" stroke-width="3"/>
+          <rect x="16" y="16" width="10" height="10" fill="var(--pr)"/>
+          <rect x="46" y="8" width="26" height="26" rx="3" stroke="var(--pr)" stroke-width="3"/>
+          <rect x="54" y="16" width="10" height="10" fill="var(--pr)"/>
+          <rect x="8" y="46" width="26" height="26" rx="3" stroke="var(--pr)" stroke-width="3"/>
+          <rect x="16" y="54" width="10" height="10" fill="var(--pr)"/>
+          <rect x="46" y="46" width="10" height="10" fill="var(--pr)"/>
+          <rect x="62" y="46" width="10" height="10" fill="var(--pr)"/>
+          <rect x="46" y="62" width="10" height="10" fill="var(--pr)"/>
+          <rect x="62" y="62" width="10" height="10" fill="var(--pr)"/>
+        </svg>
+        <p>Il QR appare quando<br>l'app è online</p>
+      </div>
+      <div class="qri" id="qr-info" style="display:none">
+        <p class="qrl">Oppure apri direttamente</p>
+        <span class="qru" id="qr-url">https://tuo-sito.onrender.com/send.html</span>
       </div>
     </div>
 
-    <!-- Card link messaggi -->
-    <div class="card" style="text-align:center">
-      <h2 style="color:var(--primary);margin-bottom:10px">&#128172; Messaggi ricevuti</h2>
-      <p style="color:var(--muted);margin-bottom:22px">
-        Visualizza in tempo reale tutti i messaggi anonimi inviati.
-      </p>
-      <a href="/messages" class="btn" style="display:inline-block;width:auto;padding:13px 36px">
-        Apri bacheca messaggi &rarr;
-      </a>
+    <div class="sb">
+      <span class="sn" id="msg-count">12</span>
+      <span>messaggi ricevuti finora</span>
     </div>
+  </main>
 
-  </div>
+  <footer>
+    <p>I messaggi sono anonimi e non vengono tracciati.</p>
+  </footer>
 
   <script>
-    // Carica il QR code dall'API all'avvio della pagina
+    // Tema dark/light
+    let dm = 'light';
+    (function() {
+      const dm = matchMedia('(prefers-color-scheme:dark)').matches ? 'dark' : 'light';
+      document.documentElement.setAttribute('data-theme', dm);
+    })();
+    function tt() {
+      dm = dm === 'dark' ? 'light' : 'dark';
+      document.documentElement.setAttribute('data-theme', dm);
+    }
+
+    // Carica QR code e count
     async function loadQR() {
       try {
-        const res  = await fetch('/api/qr');
+        const res = await fetch('/api/qr');
         const data = await res.json();
         if (data.qr) {
-          document.getElementById('qr-box').innerHTML =
-            '<img src="' + data.qr + '" alt="QR Code" width="260">' +
-            '<span class="badge">&#128247; Scansiona per inviare</span>';
+          document.getElementById('qr-box').innerHTML = '<img src="' + data.qr + '" alt="QR Code" width="240" style="border-radius:.75rem;box-shadow:0 6px 36px rgba(124,111,255,.35);border:2px solid var(--brd);padding:8px;background:#fff">';
+          // Mostra anche il link
+          const url = data.qr.includes('localhost') ? 'http://localhost:3000/send' : window.location.origin + '/send';
+          document.getElementById('qr-url').textContent = url;
+          document.getElementById('qr-info').style.display = 'block';
         } else {
-          document.getElementById('qr-box').innerHTML =
-            '<p style="color:var(--danger)">Errore caricamento QR.</p>';
+          document.getElementById('qr-box').innerHTML = '<p style="color:var(--err);font-size:.875rem">Errore caricamento QR.</p>';
         }
       } catch(e) {
-        document.getElementById('qr-box').innerHTML =
-          '<p style="color:var(--danger)">Impossibile connettersi al server.</p>';
+        document.getElementById('qr-box').innerHTML = '<p style="color:var(--err);font-size:.875rem">Impossibile connettersi al server.</p>';
       }
+
+      // Count messaggi
+      try {
+        const res2 = await fetch('/api/count');
+        const data2 = await res2.json();
+        document.getElementById('msg-count').textContent = data2.total || 0;
+      } catch(e) {}
     }
     loadQR();
   </script>
