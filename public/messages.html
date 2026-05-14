@@ -91,6 +91,14 @@
     function fmt(ts){return new Date(ts).toLocaleString('it-IT',{dateStyle:'medium',timeStyle:'short'})}
     function esc(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;')}
 
+    function renumMids(){
+      const els=Array.from(document.getElementById('ml').querySelectorAll('.mc2'));
+      const tot=els.length;
+      els.forEach(function(el,i){
+        const mid=el.querySelector('.mid');
+        if(mid)mid.textContent='#'+(tot-i);
+      });
+    }
     function msgEl(m,idx){
       const c=document.createElement('article');
       c.className='mc2 mnew';
@@ -116,6 +124,7 @@
           ml.innerHTML='<div class="es"><svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg><h3>Nessun messaggio ancora</h3><p>Condividi il tuo link o QR code per ricevere messaggi anonimi!</p></div>'
         }else{
           messages.forEach((m,i)=>ml.appendChild(msgEl(m,i)))
+                    renumMids();
         }
         updChip()
       }catch(e){
@@ -130,11 +139,8 @@
       const es=ml.querySelector('.es');
       if(es)es.remove();
       ml.insertBefore(msgEl(m,0),ml.firstChild);
-      Array.from(ml.querySelectorAll('.mc2')).forEach((el,i)=>{
-        const mid=el.querySelector('.mid');
-        if(mid)mid.textContent='#'+(i+1)
-      });
-      updChip()
+                renumMids();
+updChip()
     });
 
     socket.on('connect',()=>{console.log('WebSocket connesso');loadMessages()});
@@ -168,12 +174,8 @@
           if(messages.length===0){
             ml.innerHTML='<div class="es"><svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg><h3>Nessun messaggio ancora</h3><p>Condividi il tuo link o QR code per ricevere messaggi anonimi!</p></div>'
           }else{
-            Array.from(ml.querySelectorAll('.mc2')).forEach((el,i)=>{
-              const mid=el.querySelector('.mid');
-              if(mid)mid.textContent='#'+(i+1)
-            })
-          }
-          updChip()
+                      renumMids();
+          updChip();
         }else{
           alert('Errore durante l\'eliminazione')
         }
@@ -191,11 +193,7 @@
       if(messages.length===0&&ml){
         ml.innerHTML='<div class="es"><svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg><h3>Nessun messaggio ancora</h3><p>Condividi il tuo link o QR code per ricevere messaggi anonimi!</p></div>';
       }else if(ml){
-        Array.from(ml.querySelectorAll('.mc2')).forEach(function(el,i){
-          var mid=el.querySelector('.mid');
-          if(mid)mid.textContent='#'+(i+1);
-        });
-      }
+                  renumMids();
       updChip();
     });
     loadMessages()
