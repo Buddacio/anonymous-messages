@@ -26,10 +26,10 @@
            style="width:auto;padding:10px 20px;font-size:.9rem">
           &#128196; Scarica PDF
         </a>
-              <button onclick="clearMessages()"
+        <button onclick="clearMessages()"
           class="btn"
-          style="width:auto;padding:10px 20px;font-size:.9rem;background:var(--danger);color:#fff;border:none;border-radius:8px;cursor:pointer;">
-          &#128465; Svuota messaggi
+          style="width:auto;padding:10px 20px;font-size:.9rem;background:var(--danger);box-shadow:none">
+          &#128465; Svuota
         </button>
         <a href="/"
            class="btn btn-secondary"
@@ -52,7 +52,7 @@
   <script src="/socket.io/socket.io.js"></script>
   <script>
     const socket = io();   // connessione WebSocket al server
-    let messages = [];
+    let messages  = [];
     let lastCount = 0;     // usato dal polling per rilevare nuovi messaggi
 
     // Formatta data/ora in italiano
@@ -81,15 +81,16 @@
     // Aggiorna il contatore
     function updateCount() {
       const n = messages.length;
-      document.getElementById('msg-count').textContent = n + (n === 1 ? ' messaggio' : ' messaggi');
+      document.getElementById('msg-count').textContent =
+        n + (n === 1 ? ' messaggio' : ' messaggi');
     }
 
     // Carica i messaggi esistenti all'apertura della pagina
     async function loadMessages() {
       try {
-        const res = await fetch('/api/messages');
+        const res  = await fetch('/api/messages');
         const data = await res.json();
-        messages = data;
+        messages  = data;
         lastCount = messages.length;
         const list = document.getElementById('msg-list');
         list.innerHTML = '';
@@ -110,23 +111,22 @@
       messages.unshift(m);
       lastCount = messages.length;
       const list = document.getElementById('msg-list');
-      const ph = list.querySelector(':scope > p');
+      const ph   = list.querySelector(':scope > p');
       if (ph) ph.remove();
       list.insertBefore(msgEl(m), list.firstChild);
       updateCount();
     });
 
-    // Alla riconnessione Socket.io ricarica i messaggi (copertura per sleep di Render)
+    // Alla riconnessione Socket.io ricarica i messaggi
     socket.on('connect', () => {
       console.log('WebSocket connesso');
       loadMessages();
     });
-
     socket.on('disconnect', () => console.log('WebSocket disconnesso'));
 
     // Svuota lista in tempo reale
     socket.on('messages_cleared', () => {
-      messages = [];
+      messages  = [];
       lastCount = 0;
       document.getElementById('msg-list').innerHTML =
         '<p style="color:var(--muted);text-align:center;padding:60px 20px">Nessun messaggio ancora. Condividi il QR code!</p>';
@@ -134,23 +134,19 @@
     });
 
     // ---- POLLING DI FALLBACK ogni 5 secondi ----
-    // Serve quando il WebSocket non e' disponibile (Render Free, firewall, etc.)
     setInterval(async () => {
       try {
-        const res = await fetch('/api/count');
+        const res  = await fetch('/api/count');
         const data = await res.json();
         if (data.total !== lastCount) {
-          // Ci sono messaggi nuovi (o eliminati): ricarica tutto
           loadMessages();
         }
-      } catch(e) {
-        // ignora errori di rete transitori
-      }
+      } catch(e) { /* ignora errori transitori */ }
     }, 5000);
 
     // Funzione svuota messaggi
     async function clearMessages() {
-      if (!confirm('Sei sicuro di voler eliminare TUTTI i messaggi? Questa azione e\' irreversibile.')) return;
+      if (!confirm("Sei sicuro di voler eliminare TUTTI i messaggi? Questa azione e' irreversibile.")) return;
       try {
         const res = await fetch('/api/messages', { method: 'DELETE' });
         if (!res.ok) {
@@ -165,5 +161,6 @@
     // Primo caricamento
     loadMessages();
   </script>
+
 </body>
 </html>
