@@ -27,10 +27,10 @@
     <!-- Card link messaggi -->
     <div class="card" style="text-align:center">
       <h2 style="color:var(--primary);margin-bottom:10px">&#128172; Messaggi ricevuti</h2>
-      <p style="color:var(--muted);margin-bottom:20px">
+      <p style="color:var(--muted);margin-bottom:22px">
         Visualizza in tempo reale tutti i messaggi anonimi inviati.
       </p>
-      <a href="/messages" class="btn" style="display:inline-block;width:auto;padding:12px 32px">
+      <a href="/messages" class="btn" style="display:inline-block;width:auto;padding:13px 36px">
         Apri bacheca messaggi &rarr;
       </a>
     </div>
@@ -43,10 +43,10 @@
       try {
         const res  = await fetch('/api/qr');
         const data = await res.json();
-                  if (data.qr) {
+        if (data.qr) {
           document.getElementById('qr-box').innerHTML =
-                          '<img src="' + data.qr + '" alt="QR Code" width="260">' +
-                        '<span class="badge">&#128247; Scansiona per inviare</span>';
+            '<img src="' + data.qr + '" alt="QR Code" width="260">' +
+            '<span class="badge">&#128247; Scansiona per inviare</span>';
         } else {
           document.getElementById('qr-box').innerHTML =
             '<p style="color:var(--danger)">Errore caricamento QR.</p>';
