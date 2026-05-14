@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="it" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1.0">
+  <title>Invia Messaggio Anonimo</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="https://cdn.socket.io/4.5.4/socket.io.min.js"></script>
+</head>
+<body>
+
+<!-- Header -->
+<header class="hdr">
+  <div class="hi">
+    <div class="logo">
+      <svg width="32" height="32" viewBox="0 0 32 32" fill="none"><rect width="32" height="32" rx="8" fill="var(--pr)"/><path d="M7 10h18M7 16h12M7 22h8" stroke="white" stroke-width="2.2" stroke-linecap="round"/><circle cx="26" cy="22" r="4" fill="white" opacity=".9"/><path d="M24.5 22h3M26 20.5v3" stroke="var(--pr)" stroke-width="1.5" stroke-linecap="round"/></svg>
+      <span>Messaggi Anonimi</span>
+    </div>
+    <button class="tgl" onclick="tt()" aria-label="Cambia tema"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg></button>
+  </div>
+</header>
+
+<!-- PAGINA INVIO -->
+<div class="pg vis" id="pg-send">
+  <main class="mc sp">
+    <div id="fv">
+      <div class="si"><svg width="48" height="48" viewBox="0 0 48 48" fill="none"><rect width="48" height="48" rx="14" fill="var(--prhi)"/><path d="M12 16l12 10 12-10" stroke="var(--pr)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><rect x="12" y="14" width="24" height="20" rx="3" stroke="var(--pr)" stroke-width="2"/></svg></div>
+      <h1 class="stit">Scrivi il tuo messaggio</h1>
+      <p class="sdesc">Il tuo messaggio sarà completamente anonimo.<br>Nessun dato personale viene registrato.</p>
+      <div class="fg">
+        <label for="dta" class="fl">Il tuo messaggio</label>
+        <textarea id="dta" rows="6" maxlength="1000" placeholder="Scrivi qui il tuo messaggio..."></textarea>
+        <span class="cc" id="dcc">0 / 1000</span>
+      </div>
+      <button class="btn btn-p btn-f" id="sendBtn" onclick="doSend()"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 2L11 13M22 2L15 22l-4-9-9-4 20-7z"/></svg> Invia messaggio</button>
+      <p class="pn">Nessun indirizzo IP o dato identificativo viene memorizzato.</p>
+    </div>
+
+    <div id="sv" style="display:none;flex-direction:column;align-items:center;text-align:center">
+      <div class="sucic"><svg width="64" height="64" viewBox="0 0 64 64" fill="none"><circle cx="32" cy="32" r="28" fill="var(--okhi)"/><path d="M20 32l8 8 16-16" stroke="var(--ok)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+      <h2 class="suctit">Messaggio inviato!</h2>
+      <p class="sucd">Il tuo messaggio è stato ricevuto in modo completamente anonimo. Grazie per aver partecipato.</p>
+      <button class="btn btn-s" onclick="rSend()">Invia un altro messaggio</button>
+    </div>
+  </main>
+</div>
+
+<!-- PAGINA BACHECA -->
+<div class="pg" id="pg-board">
+  <main class="am">
+    <div class="at">
+      <div class="as">
+        <span class="sc" id="chip">0 messaggi</span>
+        <span class="lb"><span class="ld"></span> In ascolto</span>
+      </div>
+      <p class="ah">I nuovi messaggi appaiono automaticamente - nessun ricaricamento necessario.</p>
+    </div>
+    <div class="ml" id="ml">
+      <div class="es"><svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg><h3>Nessun messaggio ancora</h3><p>I messaggi inviati appariranno qui!</p></div>
+    </div>
+  </main>
+</div>
+
+<!-- SWITCHER -->
+<nav class="sw">
+  <button class="on" id="b-send" onclick="sp('send')">Invio</button>
+  <button id="b-board" onclick="sp('board')">Bacheca</button>
+</nav>
+
+  <script>
+let dm='light';(function(){dm=matchMedia('(prefers-color-scheme:dark)').matches?'dark':'light';document.documentElement.setAttribute('data-theme',dm)})();
+function tt(){dm=dm==='light'?'dark':'light';document.documentElement.setAttribute('data-theme',dm)}
+
+function sp(n){
+  ['send','board'].forEach(p=>{
+    document.getElementById('pg-'+p).classList.remove('vis');
+    document.getElementById('b-'+p).classList.remove('on');
+  });
+  document.getElementById('pg-'+n).classList.add('vis');
+  document.getElementById('b-'+n).classList.add('on');
+  window.scrollTo(0,0);
+}
+
+const dta=document.getElementById('dta');
+const dcc=document.getElementById('dcc');
+const sendBtn=document.getElementById('sendBtn');
+dta.addEventListener('input',()=>dcc.textContent=dta.value.length+' / 1000');
+
+async function doSend(){
+  const content=dta.value.trim();
+  if(!content){dta.focus();return}
+  sendBtn.disabled=true;
+  sendBtn.innerHTML='<svg width="18" height="18" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="3" fill="none" opacity=".3"/><path d="M22 12A10 10 0 0 0 12 2" stroke="currentColor" stroke-width="3" fill="none" stroke-linecap="round"><animateTransform attributeName="transform" type="rotate" from="0 12 12" to="360 12 12" dur="1s" repeatCount="indefinite"/></path></svg> Invio in corso...';
+  try{
+    const res=await fetch('/api/messages',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({content})});
+    if(res.ok){
+      document.getElementById('fv').style.display='none';
+      document.getElementById('sv').style.display='flex';
+    }else{
+      alert('Errore durante l\'invio');
+      sendBtn.disabled=false;
+      sendBtn.innerHTML='<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 2L11 13M22 2L15 22l-4-9-9-4 20-7z"/></svg> Invia messaggio';
+    }
+  }catch(err){
+    alert('Errore: '+err.message);
+    sendBtn.disabled=false;
+    sendBtn.innerHTML='<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 2L11 13M22 2L15 22l-4-9-9-4 20-7z"/></svg> Invia messaggio';
+  }
+}
+
+function rSend(){
+  dta.value='';
+  dcc.textContent='0 / 1000';
+  sendBtn.disabled=false;
+  sendBtn.innerHTML='<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 2L11 13M22 2L15 22l-4-9-9-4 20-7z"/></svg> Invia messaggio';
+  document.getElementById('fv').style.display='';
+  document.getElementById('sv').style.display='none';
+}
+
+let messages=[],lastCount=0;
+const socket=io();
+
+function fmt(ts){return new Date(ts).toLocaleString('it-IT')}
+
+function msgEl(m,idx){
+  const c=document.createElement('article');
+  c.className='mc2 mnew';
+  c.dataset.id=m.id;
+  c.innerHTML='<div class="mm"><span class="mid">#'+(idx+1)+'</span><time class="mtm">'+fmt(m.timestamp)+'</time></div><p class="mct">'+m.content.replace(/</g,'&lt;').replace(/>/g,'&gt;')+'</p>';
+  return c
+}
+
+function updChip(){document.getElementById('chip').textContent=messages.length+(messages.length===1?' messaggio':' messaggi')}
+
+async function loadMessages(){
+  try{
+    const res=await fetch('/api/messages');
+    const data=await res.json();
+    messages=data;
+    lastCount=messages.length;
+    const ml=document.getElementById('ml');
+    ml.innerHTML='';
+    if(messages.length===0){
+      ml.innerHTML='<div class="es"><svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg><h3>Nessun messaggio ancora</h3><p>I messaggi inviati appariranno qui!</p></div>'
+    }else{
+      messages.forEach((m,i)=>ml.appendChild(msgEl(m,i)))
+    }
+    updChip()
+  }catch(e){console.error('Errore caricamento:',e)}
+}
+
+socket.on('new_message',(m)=>{
+  messages.unshift(m);
+  lastCount=messages.length;
+  const ml=document.getElementById('ml');
+  if(ml.querySelector('.es'))ml.innerHTML='';
+  const el=msgEl(m,0);
+  ml.insertBefore(el,ml.firstChild);
+  Array.from(ml.querySelectorAll('.mc2')).forEach((el,i)=>{
+    const mid=el.querySelector('.mid');
+    if(mid)mid.textContent='#'+(i+1)
+  });
+  updChip()
+});
+
+socket.on('connect',()=>{console.log('WebSocket connesso');loadMessages()});
+socket.on('disconnect',()=>console.log('WebSocket disconnesso'));
+
+socket.on('messages_cleared',()=>{
+  messages=[];
+  lastCount=0;
+  const ml=document.getElementById('ml');
+  ml.innerHTML='<div class="es"><svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg><h3>Nessun messaggio ancora</h3><p>I messaggi inviati appariranno qui!</p></div>';
+  updChip()
+});
+</script>
+
+</body>
+</html>
