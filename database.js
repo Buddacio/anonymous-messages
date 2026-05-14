@@ -44,4 +44,17 @@ async function clearAllMessages() {
   await pool.query('DELETE FROM messages');
 }
 
-module.exports = { initDatabase, insertMessage, getAllMessages, getAllMessagesAsc, countMessages, clearAllMessages };
+async function deleteMessage(id) {
+  const res = await pool.query('DELETE FROM messages WHERE id = $1 RETURNING *', [id]);
+  return res.rows[0];
+}
+
+module.exports = {
+  initDatabase,
+  insertMessage,
+  getAllMessages,
+  getAllMessagesAsc,
+  countMessages,
+  clearAllMessages,
+  deleteMessage
+};
