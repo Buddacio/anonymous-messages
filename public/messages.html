@@ -182,6 +182,22 @@
       }
     }
 
+        socket.on('message_deleted',function(data){
+      messages=messages.filter(function(m){return m.id!==data.id});
+      lastCount=messages.length;
+      var ml=document.getElementById('ml');
+      var el=ml?ml.querySelector('[data-id="'+data.id+'"]'):null;
+      if(el)el.remove();
+      if(messages.length===0&&ml){
+        ml.innerHTML='<div class="es"><svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg><h3>Nessun messaggio ancora</h3><p>Condividi il tuo link o QR code per ricevere messaggi anonimi!</p></div>';
+      }else if(ml){
+        Array.from(ml.querySelectorAll('.mc2')).forEach(function(el,i){
+          var mid=el.querySelector('.mid');
+          if(mid)mid.textContent='#'+(i+1);
+        });
+      }
+      updChip();
+    });
     loadMessages()
   </script>
 
